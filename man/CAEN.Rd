@@ -8,8 +8,10 @@ differentially expressed genes}
 CAEN(dataTable, y, K, gene_no_list)
 }
 \arguments{
-\item{dataTable}{Matrix or data.frame containing read counts and the row 
-denotes the gene}
+\item{dataTable}{would be a SummarizedExperiment Bioconductor object, then 
+it would be transformed into a p times n matrix - i.e. features on the rows 
+and observations on the columns in the function, or dataTable would be a p 
+times n matrix.}
 
 \item{y}{the category for each sample}
 
@@ -31,14 +33,7 @@ number to identify  differentially expressed genes.
 \examples{
 library(SummarizedExperiment)
 dat <- newCountDataSet(n=40,p=500,sdsignal=0.1,K=4,param=10,drate=0.4)
-x <- t(assay(dat$sim_train_data))                  
+x <- dat$sim_train_data         
 y <- as.numeric(colnames(dat$sim_train_data))      
-xte <- t(assay(dat$sim_test_data))                 
-prob <- estimatep(x=x,y=y,xte=x,beta=1,
-type=c("mle","deseq","quantile"),prior=NULL)      
-prob0 <- estimatep(x=x,y=y,xte=xte,beta=1,
-type=c("mle","deseq","quantile"),prior=NULL)   
-myscore <- CAEN(dataTable=assay(dat$sim_train_data),
-y=as.numeric(colnames(dat$sim_train_data)),
-K=4,gene_no_list=100)
+myscore <- CAEN(dataTable=x, y=y, K=4, gene_no_list=100)
 }
