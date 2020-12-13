@@ -8,14 +8,17 @@ ZIPLDA(x, y, xte=NULL, rho = 0, beta = 1, rhos = NULL, prob0=NULL,
 type=c("mle","deseq","quantile"),prior = NULL, transform=TRUE, alpha=NULL)
 }
 \arguments{
-\item{x}{A n-by-p training data matrix; n observations and p features.
-Used to train the classifier.}
+\item{x}{would be a SummarizedExperiment Bioconductor object, then it would 
+be transformed into a n times p matrix - i.e. observations on the rows and
+features on the columns in the function, or x would be a n times p matrix.}
 
 \item{y}{A numeric vector of class labels of length n: 1, 2, ...., K
 if there are K classes.Each element of y corresponds to a row of x;
 i.e. these are the class labels for the observations in x.}
 
-\item{xte}{A m-by-p data matrix: m test observations and p features.
+\item{xte}{would be a SummarizedExperiment Bioconductor object, then it 
+would be transformed into a m-by-p data matrix: m test observations and p 
+features, or xte would be a m-by-p data matrix.
 The classifier fit on the training data set x will be tested on this
 data set. If NULL, then testing will be performed on the training set.}
 
@@ -79,12 +82,12 @@ Classify observations using a Zero-inflated Poisson model.
 }
 \examples{
 library(SummarizedExperiment)
-dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1,drate=0.4)
-x <- t(assay(dat$sim_train_data))
+dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1, drate=0.4)
+x <- dat$sim_train_data
 y <- as.numeric(colnames(dat$sim_train_data))
-xte <- t(assay(dat$sim_test_data))
-prob<-estimatep(x=x, y=y, xte=x, beta=1, type="mle", prior=NULL)
-prob0<-estimatep(x=x, y=y, xte=xte, beta=1,type="mle", prior=NULL)
-cv.out <- ZIPDA.cv(x=x, y=y, prob0=t(prob))
+xte <- dat$sim_test_data
+prob <- estimatep(x=x, y=y, xte=x, beta=1, type="mle", prior=NULL)
+prob0 <- estimatep(x=x, y=y, xte=xte, beta=1, type="mle", prior=NULL)
+cv.out <- ZIPLDA.cv(x=x, y=y, prob0=t(prob))
 out <- ZIPLDA(x=x, y=y, xte=xte, rho=cv.out$bestrho, prob0=t(prob0))
 }
