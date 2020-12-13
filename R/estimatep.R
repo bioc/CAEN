@@ -1,15 +1,17 @@
-#' Estimate the probability that the read is 0 in a Zero-inflated
+#' Estimate the probability that the read is 0 in a Zero-inflated Poisson model.
+#' @description Estimate the probability that the read is 0 in a Zero-inflated 
 #' Poisson model.
-#' @description Estimate the probability that the read is 0 in
-#' a Zero-inflated Poisson model.
-#' @usage estimatep(x,y,xte=NULL,beta=1,
-#' type=c("mle","deseq","quantile"), prior=NULL)
-#' @param x MUST be a n times p matrix - i.e. observations on the rows and
-#' features on the columns
+#' @usage estimatep(x, y, xte=NULL, beta=1, type=c("mle","deseq","quantile"), 
+#' prior=NULL)
+#' @param x would be a SummarizedExperiment Bioconductor object, then it would 
+#' be transformed into a n times p matrix - i.e. observations on the rows and
+#' features on the columns in the function, or x would be a n times p matrix.
 #' @param y A numeric vector of class labels of length n: 1, 2, ...., K
 #' if there are K classes.Each element of y corresponds to a row of x;
 #' i.e. these are the class labels for the observations in x.
-#' @param xte A m-by-p data matrix: m test observations and p features.
+#' @param xte would be a SummarizedExperiment Bioconductor object, then would 
+#' be transformed into a m-by-p data matrix: m test observations and p features,
+#' or xte would be a m-by-p data matrix.
 #' The classifier fit on the training data set x will be tested on this
 #' data set. If NULL, then testing will be performed on the training set.
 #' @param beta A standardized parameter
@@ -17,36 +19,45 @@
 #' @param prior vector of length equal to the number of classes, representing
 #' prior probabilities for each class.If NULL then uniform priors are used
 #' (i.e. each class is equally likely)
-#' @return p the probability that the read is 0 in a
-#'  Zero-inflated Poisson model
+#' @return p the probability that the read is 0 in a Zero-inflated Poisson 
+#' model
 #' @examples
 #' library(SummarizedExperiment)
-#' dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1,drate=0.4)
-#' x <- t(assay(dat$sim_train_data))
+#' dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1, drate=0.4)
+#' x <- dat$sim_train_data
 #' y <- as.numeric(colnames(dat$sim_train_data))
-#' xte <- t(assay(dat$sim_test_data))
+#' xte <- dat$sim_test_data
 #' prob <- estimatep(x=x, y=y, xte=x, beta=1, type="mle", prior=NULL)
 #' @export
 
-estimatep <- function(x, y, xte=NULL, beta=1,
-                    type=c("mle","deseq","quantile"), prior=NULL){
-    
+estimatep <- function(x, y, xte=NULL, beta=1, type=c("mle","deseq","quantile"), 
+                      prior=NULL){
+    if (is(x, "SummarizedExperiment")) {
+        x <- t(SummarizedExperiment::assay(x))
+    }else{
+        x <- x
+    }
     if (is.null(xte)) {
-    xte <- x
+        xte <- x
     warning("Since no xte was provided, testing was performed
         on training data set.")
+    }else{
+        if (is(xte, "SummarizedExperiment")) {
+            xte <- t(SummarizedExperiment::assay(xte))
+        }else{
+            xte <- xte
+        }
     }
     type <- match.arg(type)
-    if (is.null(prior)) prior <- rep(1/length(unique(y)),
-                                    length(unique(y)))
+    if (is.null(prior)) prior <- rep(1/length(unique(y)), length(unique(y)))
     null.out <- PoiClaClu::NullModel(x, type = type)
     ns <- null.out$n
     nste <- PoiClaClu::NullModelTest(null.out,x,xte,type = type)$nste
     ds <-  GetDn(ns,x,y,beta)
     mu <- matrix(NA, nrow = nrow(x), ncol = length(x[1,]))
     for (i in seq_len(nrow(x))) {
-    dstar = ds[y[i],]
-    mu[i,] <- nste[i,]*dstar
+        dstar = ds[y[i],]
+        mu[i,] <- nste[i,]*dstar
     }
     G <- length(x[1,])
     lib <- rowSums(x)
