@@ -2,21 +2,23 @@
 % Please edit documentation in R/estimatep.R
 \name{estimatep}
 \alias{estimatep}
-\title{Estimate the probability that the read is 0 in a Zero-inflated
-Poisson model.}
+\title{Estimate the probability that the read is 0 in a Zero-inflated Poisson model.}
 \usage{
-estimatep(x,y,xte=NULL,beta=1,
-type=c("mle","deseq","quantile"), prior=NULL)
+estimatep(x, y, xte=NULL, beta=1, type=c("mle","deseq","quantile"), 
+prior=NULL)
 }
 \arguments{
-\item{x}{MUST be a n times p matrix - i.e. observations on the rows and
-features on the columns}
+\item{x}{would be a SummarizedExperiment Bioconductor object, then it would 
+be transformed into a n times p matrix - i.e. observations on the rows and
+features on the columns in the function, or x would be a n times p matrix.}
 
 \item{y}{A numeric vector of class labels of length n: 1, 2, ...., K
 if there are K classes.Each element of y corresponds to a row of x;
 i.e. these are the class labels for the observations in x.}
 
-\item{xte}{A m-by-p data matrix: m test observations and p features.
+\item{xte}{would be a SummarizedExperiment Bioconductor object, then would 
+be transformed into a m-by-p data matrix: m test observations and p features,
+or xte would be a m-by-p data matrix.
 The classifier fit on the training data set x will be tested on this
 data set. If NULL, then testing will be performed on the training set.}
 
@@ -29,18 +31,18 @@ prior probabilities for each class.If NULL then uniform priors are used
 (i.e. each class is equally likely)}
 }
 \value{
-p the probability that the read is 0 in a
- Zero-inflated Poisson model
+p the probability that the read is 0 in a Zero-inflated Poisson 
+model
 }
 \description{
-Estimate the probability that the read is 0 in
-a Zero-inflated Poisson model.
+Estimate the probability that the read is 0 in a Zero-inflated 
+Poisson model.
 }
 \examples{
 library(SummarizedExperiment)
-dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1,drate=0.4)
-x <- t(assay(dat$sim_train_data))
+dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1, drate=0.4)
+x <- dat$sim_train_data
 y <- as.numeric(colnames(dat$sim_train_data))
-xte <- t(assay(dat$sim_test_data))
+xte <- dat$sim_test_data
 prob <- estimatep(x=x, y=y, xte=x, beta=1, type="mle", prior=NULL)
 }
