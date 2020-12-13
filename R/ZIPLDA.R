@@ -2,12 +2,15 @@
 #' @description Classify observations using a Zero-inflated Poisson model.
 #' @usage ZIPLDA(x, y, xte=NULL, rho = 0, beta = 1, rhos = NULL, prob0=NULL,
 #' type=c("mle","deseq","quantile"),prior = NULL, transform=TRUE, alpha=NULL)
-#' @param x A n-by-p training data matrix; n observations and p features.
-#' Used to train the classifier.
+#' @param x would be a SummarizedExperiment Bioconductor object, then it would 
+#' be transformed into a n times p matrix - i.e. observations on the rows and
+#' features on the columns in the function, or x would be a n times p matrix.
 #' @param y A numeric vector of class labels of length n: 1, 2, ...., K
 #' if there are K classes.Each element of y corresponds to a row of x;
 #' i.e. these are the class labels for the observations in x.
-#' @param xte A m-by-p data matrix: m test observations and p features.
+#' @param xte would be a SummarizedExperiment Bioconductor object, then it 
+#' would be transformed into a m-by-p data matrix: m test observations and p 
+#' features, or xte would be a m-by-p data matrix.
 #' The classifier fit on the training data set x will be tested on this
 #' data set. If NULL, then testing will be performed on the training set.
 #' @param rho Tuning parameter controlling the amount of soft thresholding
@@ -57,13 +60,13 @@
 #' Power transformation used (if transform=TRUE).
 #' @examples
 #' library(SummarizedExperiment)
-#' dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1,drate=0.4)
-#' x <- t(assay(dat$sim_train_data))
+#' dat <- newCountDataSet(n=40,p=500, K=4, param=10, sdsignal=0.1, drate=0.4)
+#' x <- dat$sim_train_data
 #' y <- as.numeric(colnames(dat$sim_train_data))
-#' xte <- t(assay(dat$sim_test_data))
-#' prob<-estimatep(x=x, y=y, xte=x, beta=1, type="mle", prior=NULL)
-#' prob0<-estimatep(x=x, y=y, xte=xte, beta=1,type="mle", prior=NULL)
-#' cv.out <- ZIPDA.cv(x=x, y=y, prob0=t(prob))
+#' xte <- dat$sim_test_data
+#' prob <- estimatep(x=x, y=y, xte=x, beta=1, type="mle", prior=NULL)
+#' prob0 <- estimatep(x=x, y=y, xte=xte, beta=1, type="mle", prior=NULL)
+#' cv.out <- ZIPLDA.cv(x=x, y=y, prob0=t(prob))
 #' out <- ZIPLDA(x=x, y=y, xte=xte, rho=cv.out$bestrho, prob0=t(prob0))
 #' @export
 
@@ -71,10 +74,21 @@ ZIPLDA <-
     function(x, y, xte=NULL, rho=0, beta=1, rhos=NULL, prob0=NULL,
              type=c("mle","deseq","quantile"),
              prior=NULL, transform=TRUE, alpha=NULL){
+        if (is(x, "SummarizedExperiment")) {
+            x <- t(SummarizedExperiment::assay(x))
+        }else{
+            x <- x
+        }
         if (is.null(xte)) {
             xte <- x
             warning("Since no xte was provided, testing was
             performed on training data set.")
+        }else{
+            if (is(xte, "SummarizedExperiment")) {
+                xte <- t(SummarizedExperiment::assay(xte))
+            }else{
+                xte <- xte
+            }
         }
         if (!is.null(rho) && length(rho) > 1)
             stop("Can only enter 1 value of rho. If you would like
