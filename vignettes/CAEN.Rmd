@@ -8,6 +8,7 @@ vignette: >
     %\VignetteIndexEntry{CAEN Tutorial}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
+    %\VignetteDepends{BiocStyle}
 ---
 
 
