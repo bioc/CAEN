@@ -20,7 +20,7 @@ LazyData: true
 biocViews: DifferentialExpression, Sequencing, Classification,
      RNASeq, ATACSeq, SingleCell, GeneExpression, RIPSeq
 Depends: R (>= 4.1)
-Suggests: knitr,rmarkdown,BiocStyle
+Suggests: knitr,rmarkdown,BiocManager,SummarizedExperiment,BiocStyle
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 Imports: stats,PoiClaClu,SummarizedExperiment,methods
